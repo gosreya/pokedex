@@ -3,20 +3,6 @@ import json
 import random
 import threading
 
-"""
-
-Pokédex: Your personal pocketbook guide to all the Pokémon you'll encounter on your fabulous adventures. 
-
-On launch, the Pokédex will retreive the latest data on all Pokémon from the pokeapi, so you'll always have fresh facts. 
-
-Skills acquired: 
-+ multithreading
-+ REST API
-
-disclaimer: sometimes here I do wacky things for the sake of implementing something with a new skill instead than an old one
-
-"""
-
 class Pokedex():
 
   def __init__(self):
