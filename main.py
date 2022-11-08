@@ -85,6 +85,4 @@ while(pokemon != "quit"):
       print(random.choice(dex.pokedex[pokemon]["cool_facts"]), "\n")
       pokemon = input("\n< What Pokémon would you like to learn about? > ")
 
-# print(pokemon)
-
 
