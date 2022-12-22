@@ -2,6 +2,7 @@ import requests
 import json
 import random
 import threading
+from spelling import SpellCorrector
 
 class Pokedex():
 
@@ -27,24 +28,31 @@ class Pokedex():
       types.append(entry["name"])
     return types
 
+  def get_preevolution(self, dat):
+    preforms = None
+    if dat["evolves_from_species"]:
+      preforms = dat["evolves_from_species"]["name"]
+    return preforms
+
   def get_pokemon(self, index):
     req = requests.get(f"https://pokeapi.co/api/v2/pokemon-species/{index}/")
     if (req.status_code != 404):
       dat = json.loads(req.text)
       types = self.get_types(dat)
       flavor = self.get_flavor_text(dat)
+      preforms = self.get_preevolution(dat)
       profile = {
         "cool_facts": flavor,
-        "types": types
+        "types": types,
+        "preforms": preforms
       }
       with self._lock:
         self.pokedex[dat["name"]] = profile
   
-
+ """Area for improvement: What is the ideal number of threads?"""
   def load_dex(self, count):
     threads = []
     for p in range(1, count):
-      # YOO WHAT'S THIS???
       t = threading.Thread(target=self.get_pokemon, args=(p,))
       t.start()
       threads.append(t)
@@ -57,18 +65,26 @@ dex = Pokedex()
 count = dex.get_pokemon_count()
 print("Initializing...")
 dex.load_dex(count)
+spell_wizard = SpellCorrector(dex.pokedex.keys())
 print("complete!\n")
 
 print("Enter a Pokémon's name or enter 'quit' to end the program.\n")
 
-pokemon = input("< What Pokémon would you like to learn about? > ")
-while(pokemon != "quit"):
+request = input("< What Pokémon would you like to learn about? > ").lower()
+while(request != "quit"):
+    pokemon = spell_wizard.correction(request)
     if not pokemon in dex.pokedex.keys():
-      print("\nCould not identify Pokémon.\n")
-      pokemon = input("< What Pokémon would you like to learn about? > ")
+      print(f"\nCould not identify {request}.\n")
     else:
+      if request != pokemon:
+        print(f"\nCould not identify {request}. Did you mean {pokemon}?\n")
+      print(f"\n{pokemon.upper()}\n")
       print("\ntypes: ", dex.pokedex[pokemon]["types"], "\n")
       print(random.choice(dex.pokedex[pokemon]["cool_facts"]), "\n")
-      pokemon = input("\n< What Pokémon would you like to learn about? > ")
+      if dex.pokedex[pokemon]["preforms"]:
+        print("Evolves from", dex.pokedex[pokemon]["preforms"], "\n")
+    request = input("\n< What Pokémon would you like to learn about? > ").lower()
+
+print("See you later!")
 
 
