@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-
-import requests
+from urllib.request import Request, urlopen
+from urllib.error import HTTPError
 import json
 import random
 import threading
@@ -163,8 +163,11 @@ class Pokedex():
     self._lock = threading.Lock()
 
   def get_pokemon_count(self):
-    req = requests.get("https://pokeapi.co/api/v2/pokemon-species/")
-    return(json.loads(req.text)["count"])
+    url = "https://pokeapi.co/api/v2/pokemon-species/"
+    request_site = Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    with urlopen(request_site) as response:
+        req = json.loads(response.read())
+    return(req["count"])
   
   def get_flavor_text(self, dat):
     cool_facts = []
@@ -187,19 +190,23 @@ class Pokedex():
     return preforms
 
   def get_pokemon(self, index):
-    req = requests.get(f"https://pokeapi.co/api/v2/pokemon-species/{index}/")
-    if (req.status_code != 404):
-      dat = json.loads(req.text)
-      types = self.get_types(dat)
-      flavor = self.get_flavor_text(dat)
-      preforms = self.get_preevolution(dat)
-      profile = {
-        "cool_facts": flavor,
-        "types": types,
-        "preforms": preforms
-      }
-      with self._lock:
-        self.pokedex[dat["name"]] = profile
+    url = f"https://pokeapi.co/api/v2/pokemon-species/{index}/"
+    request_site = Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    try:
+      with urlopen(request_site) as response:
+          dat = json.loads(response.read())
+    except HTTPError:
+      return
+    types = self.get_types(dat)
+    flavor = self.get_flavor_text(dat)
+    preforms = self.get_preevolution(dat)
+    profile = {
+      "cool_facts": flavor,
+      "types": types,
+      "preforms": preforms
+    }
+    with self._lock:
+      self.pokedex[dat["name"]] = profile
   
   def load_dex(self, count):
     """Area for improvement: What is the ideal number of threads?"""
