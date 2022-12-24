@@ -5,6 +5,8 @@ import json
 import random
 import threading
 import argparse
+import os
+import pathlib
 from spelling import SpellCorrector
 
 POKEGALLERY = {
@@ -159,8 +161,12 @@ POKEGALLERY = {
 class Pokedex():
 
   def __init__(self):
+    print(os.getcwd())
     self.pokedex = {}
     self._lock = threading.Lock()
+    directory = os.path.dirname(os.path.realpath(__file__))
+    self.pokefile = pathlib.Path(directory) / "pokefile.json"
+    
 
   def get_pokemon_count(self):
     url = "https://pokeapi.co/api/v2/pokemon-species/"
@@ -223,11 +229,11 @@ class Pokedex():
     print("Updating pokefile...")
     count = self.get_pokemon_count()
     self.load_dex(count)
-    with open("pokefile.json", "w") as pokefile:
+    with open(self.pokefile, "w") as pokefile:
       pokefile.write(json.dumps(self.pokedex))
 
   def answer(self, request):
-    with open("pokefile.json", "r") as pokefile:
+    with open(self.pokefile, "r") as pokefile:
       self.pokedex = json.loads(pokefile.read())
     spell_wizard = SpellCorrector(self.pokedex.keys())
     pokemon = spell_wizard.correction(request.lower())
