@@ -7,6 +7,7 @@ import threading
 import argparse
 import os
 import pathlib
+import concurrent.futures
 from spelling import SpellCorrector
 
 POKEGALLERY = {
@@ -161,7 +162,6 @@ POKEGALLERY = {
 class Pokedex():
 
   def __init__(self):
-    print(os.getcwd())
     self.pokedex = {}
     self._lock = threading.Lock()
     directory = os.path.dirname(os.path.realpath(__file__))
@@ -215,15 +215,9 @@ class Pokedex():
       self.pokedex[dat["name"]] = profile
   
   def load_dex(self, count):
-    """Area for improvement: What is the ideal number of threads?"""
-    threads = []
-    for p in range(1, count):
-      t = threading.Thread(target=self.get_pokemon, args=(p,))
-      t.start()
-      threads.append(t)
-
-    for t in threads:
-      t.join()
+    indices = range(1, count)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=15) as executor:
+        executor.map(self.get_pokemon, indices)
 
   def update_file(self):
     print("Updating pokefile...")
@@ -242,11 +236,14 @@ class Pokedex():
     else:
       if request != pokemon:
         print(f"\nCould not identify '{request}'. Did you mean '{pokemon}'?")
-      print(f"\n{pokemon.upper()}")
-      print("\ntypes: ", self.pokedex[pokemon]["types"], "\n")
-      print(random.choice(self.pokedex[pokemon]["cool_facts"]), "\n")
+      print(f"\n> {pokemon.upper()}")
+      print()
+      evolution = ""
       if self.pokedex[pokemon]["preforms"]:
-        print("Evolves from", self.pokedex[pokemon]["preforms"].upper(), "\n") 
+        evolution = f"|| Evolves from {self.pokedex[pokemon]['preforms'].upper()}"
+      print("> types: ", self.pokedex[pokemon]["types"], evolution)
+      print()
+      print(">", random.choice(self.pokedex[pokemon]["cool_facts"]), "\n")
       if pokemon in POKEGALLERY:
         print(POKEGALLERY[pokemon])
 
