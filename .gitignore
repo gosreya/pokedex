@@ -2,3 +2,8 @@ pyprojec.toml
 poetr.lock
 main.py
 spelling.py
+.breakpoints
+.replit
+replit.nix
+venv
+__pycache__
