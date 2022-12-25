@@ -2,4 +2,6 @@
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
+[options]
+packages = find:
 
