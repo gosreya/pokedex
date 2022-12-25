@@ -4,6 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pokedex"
+dynamic = ["version"]
 
 [project.scripts]
 pokedex = "pokedex.pokedex:query"
