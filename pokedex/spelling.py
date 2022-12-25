@@ -14,6 +14,7 @@ CONSONANTS = {
 Areas for improvement: 
 - Account for common errors such as s/c replacement. 
 - Address the impossibility of finding the correction for an input thats incorrect by more than 2 letters.
+- (As mentioned by the original author) Words that are 1-letter distance from the input are considered infinitely more likely than words that are a 2-letter distance. 
 """
 class SpellCorrector:
   def __init__(self, word_list):

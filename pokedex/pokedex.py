@@ -178,7 +178,8 @@ class Pokedex():
   def get_flavor_text(self, dat):
     cool_facts = []
     for entry in dat["flavor_text_entries"]:
-      cool_facts.append(entry["flavor_text"].replace("\n", " ").replace("\x0c"," "))
+      if entry["language"]["name"] == "en":
+        cool_facts.append(entry["flavor_text"].replace("\n", " ").replace("\x0c"," "))
       if len(cool_facts) == 10:
         break
     return cool_facts
@@ -247,7 +248,7 @@ class Pokedex():
       if pokemon in POKEGALLERY:
         print(POKEGALLERY[pokemon])
 
-if __name__ == "__main__":
+def query():
   parser = argparse.ArgumentParser(description="Get any pokemon's profile.")
   parser.add_argument("pokemon", type=str, nargs='?',
                     help="name a pokemon")
@@ -260,6 +261,9 @@ if __name__ == "__main__":
       dex.update_file()
     if args.pokemon:
       dex.answer(args.pokemon)
+
+if __name__ == "__main__":
+  query()
       
 
 
