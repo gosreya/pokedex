@@ -2,6 +2,7 @@
 
 A wild Pikachu appeared! 
 
+```text
 `;-.          ___,
   `.`\_...._/`.-"`
     \        /      ,
@@ -15,6 +16,7 @@ A wild Pikachu appeared!
      >   \    /
     (_,-'`> .'
 jgs      (_,'
+```
 
 
 Luckily you have **pokedex**, your personal command line guidebook to the world of Pokémon.
@@ -22,9 +24,9 @@ Luckily you have **pokedex**, your personal command line guidebook to the world 
 Just call "pokedex \<pokemon\>" to get the profile. Don't know how to spell the Pokemon's name? No worries, the pokedex has a built in spell correction.
 
 
-![alt text](https://github.com/[gosreya]/[pokedex]/images/usecase?raw=true)
+![pokedex use case](https://github.com/gosreya/pokedex/blob/main/images/usecase.png)
 
-![alt text](https://github.com/[gosreya]/[pokedex]/images/help?raw=true)
+![pokedex help output](https://github.com/gosreya/pokedex/blob/main/images/help.png)
 
 
 **Installation**
