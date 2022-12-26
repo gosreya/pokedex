@@ -1,9 +1,10 @@
 pyprojec.toml
 poetr.lock
 main.py
-spelling.py
 .breakpoints
 .replit
+.DS_Store
 replit.nix
 venv
 __pycache__
+pokedex.egg-info/

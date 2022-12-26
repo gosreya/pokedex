@@ -7,4 +7,4 @@ name = "pokedex"
 dynamic = ["version"]
 
 [project.scripts]
-pokedex = "pokedex.pokedex:query"
+pokedex = "pokedex.main:query"
