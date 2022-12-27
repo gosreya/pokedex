@@ -9,7 +9,7 @@ import os
 import pathlib
 import concurrent.futures
 from pokedex.spelling.spelling import SpellCorrector
-import time
+import sys
 
 POKEGALLERY = {
     "pikachu": """
@@ -167,25 +167,32 @@ class Pokedex():
         self.pokecount = 0
         self.evocount = 0
         self.pokedex = {}
+        self.evolutions = {}
         self._lock = threading.Lock()
         self._evolock = threading.Lock()
         directory = os.path.dirname(os.path.realpath(__file__))
         self.pokefile = pathlib.Path(directory) / "pokefile.json"
-        self.evolutions = {}
+
+    def request_api(self, url):
+        request_site = Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        try:
+            with urlopen(request_site) as response:
+                dat = json.loads(response.read())
+                return dat
+        except HTTPError:
+            return None
 
     def get_pokemon_count(self):
-        url = "https://pokeapi.co/api/v2/pokemon-species/"
-        request_site = Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        with urlopen(request_site) as response:
-            req = json.loads(response.read())
-        self.pokecount = req["count"]
-
-        url = "https://pokeapi.co/api/v2/evolution-chain/"
-        request_site = Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        with urlopen(request_site) as response:
-            req = json.loads(response.read())
-        self.evocount = req["count"]
-
+        pokecount = self.request_api(
+            "https://pokeapi.co/api/v2/pokemon-species/")
+        evocount = self.request_api(
+            "https://pokeapi.co/api/v2/evolution-chain/")
+        if pokecount is None or evocount is None:
+            print("Error: Could not reach the PokeAPI. Please try "
+                  "updating again.")
+            sys.exit(1)
+        self.pokecount = pokecount["count"]
+        self.evocount = evocount["count"]
 
     def get_flavor_text(self, dat):
         cool_facts = []
@@ -206,37 +213,25 @@ class Pokedex():
 
     def get_evolution(self, index):
         url = f"https://pokeapi.co/api/v2/evolution-chain/{index}/"
+        dat = self.request_api(url)
         evolution_chain = []
-        request_site = Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        try:
-            with urlopen(request_site) as response:
-                dat = json.loads(response.read())["chain"]
-                while True:
-                    evolution_chain.append(dat["species"]["name"])
-                    if dat["evolves_to"] == []:
-                        break
-                    dat = dat["evolves_to"][0]
-        except HTTPError:
-            pass
+        if dat is not None:
+            dat = dat["chain"]
+            while True:
+                evolution_chain.append(dat["species"]["name"])
+                if dat["evolves_to"] == []:
+                    break
+                dat = dat["evolves_to"][0]
         with self._evolock:
             self.evolutions[url] = evolution_chain
-        return
 
     def get_pokemon(self, index):
         url = f"https://pokeapi.co/api/v2/pokemon-species/{index}/"
-        request_site = Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        try:
-            with urlopen(request_site) as response:
-                dat = json.loads(response.read())
-        except HTTPError:
-            return
+        dat = self.request_api(url)
         types = self.get_types(dat)
         flavor = self.get_flavor_text(dat)
         evolutions_url = dat["evolution_chain"]["url"]
-        if evolutions_url in self.evolutions:
-            evolutions = self.evolutions[evolutions_url]
-        else:
-            evolutions = None
+        evolutions = self.evolutions[evolutions_url]
         profile = {
             "cool_facts": flavor,
             "types": types,
@@ -268,6 +263,22 @@ class Pokedex():
         else:
             return name.upper()
 
+    def print_pokemon(self, request, pokemon):
+        if request != pokemon and request.lower() != "random":
+            print(
+                f"\nCould not identify '{request}'. Did you mean '{pokemon}'?")
+        print(f"\n> {self.evo_name(pokemon, pokemon)}\n")
+        evolution = ""
+        if len(self.pokedex[pokemon]["evolutions"]) > 1:
+            evolution = " || "
+            evolution += " -> ".join(self.evo_name(name, pokemon) for name
+                                     in
+                                     self.pokedex[
+                                         pokemon]["evolutions"])
+        print(f"> types: {self.pokedex[pokemon]['types']}{evolution}\n")
+        print(f"> {random.choice(self.pokedex[pokemon]['cool_facts'])}\n")
+        if pokemon in POKEGALLERY:
+            print(POKEGALLERY[pokemon])
 
     def answer(self, request):
         with open(self.pokefile, "r") as pokefile:
@@ -280,21 +291,7 @@ class Pokedex():
         if not pokemon in self.pokedex.keys():
             print(f"\nCould not identify '{request}'.\n")
         else:
-            if request != pokemon and request.lower() != "random":
-                print(
-                    f"\nCould not identify '{request}'. Did you mean '{pokemon}'?")
-            print(f"\n> {self.evo_name(pokemon, pokemon)}\n")
-            evolution = ""
-            if len(self.pokedex[pokemon]["evolutions"]) > 1:
-                evolution = "|| "
-                evolution += " -> ".join(self.evo_name(name, pokemon) for name
-                                         in
-                                         self.pokedex[
-                    pokemon]["evolutions"])
-            print(f"> types: {self.pokedex[pokemon]['types']} {evolution}\n")
-            print(f"> {random.choice(self.pokedex[pokemon]['cool_facts'])}\n")
-            if pokemon in POKEGALLERY:
-                print(POKEGALLERY[pokemon])
+            self.print_pokemon(request, pokemon)
 
 
 def usage_message():
