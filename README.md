@@ -25,9 +25,9 @@ Call ```pokedex <pokemon>``` to get the Pokémon's profile. Don't know how to sp
 
 
 
-<img src="https://github.com/gosreya/pokedex/blob/main/images/usecase.png" alt="pokedex use case" style="width:70%;height: auto;">
+<img src="https://github.com/gosreya/pokedex/blob/main/pokedex/images/usecase.png" alt="pokedex use case" style="width:70%;height: auto;">
 
-<img src="https://github.com/gosreya/pokedex/blob/main/images/help.png" alt="pokedex help output" style="width:70%;height: auto;">
+<img src="https://github.com/gosreya/pokedex/blob/main/pokedex/images/help.png" alt="pokedex help output" style="width:70%;height: auto;">
 
 
 ## Installation
