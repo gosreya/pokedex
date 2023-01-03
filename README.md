@@ -54,7 +54,7 @@ b=$2
 
 **Option 3: Don't install it**
 
-Use the Pokedex w/ no hassle on [Replit](https://replit.com/@SreyaGogineni1/POKEDEX#main.py) (Just click 'Run').
+Use the Pokedex (an older version) w/ no hassle on [Replit](https://replit.com/@SreyaGogineni1/POKEDEX#main.py) (Just click 'Run').
 
 ## Credits
 
